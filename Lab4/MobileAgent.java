@@ -37,7 +37,7 @@ public class MobileAgent {
     /**
      * Sends a binding update to the Home Agent to register its new CoA.
      * @param homeAgent The HomeAgent instance.
-     */
+     */ 
     public void sendBindingUpdate(HomeAgent homeAgent) {
         if (!isHomeNetwork) {
             System.out.println("MobileAgent (" + homeAddress + ") sending binding update to HomeAgent with new CoA: " + currentAddress);
