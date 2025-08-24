@@ -117,20 +117,18 @@
             <label for="audio-file" class="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">
                 Load Local Music
             </label>
-            <input type="file" id="audio-file" accept="audio/*" class="hidden">
+            <input type="file" id="audio-file" accept="audio/*" class="hidden" multiple>
+        </div>
+        <!-- Playlist display -->
+        <div id="playlist" class="mt-6 text-left">
+            <!-- Songs will be listed here -->
         </div>
     </div>
     
     <script>
-        // Data for the music player (now only for initial display, loaded from file input)
-        const songs = [
-            {
-                title: "In the Sky",
-                artist: "Imaginary Band",
-                albumArt: "https://placehold.co/200x200/264653/ffffff?text=Music",
-                audioSrc: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
-            }
-        ];
+        // Playlist data
+        let playlist = [];
+        let currentIndex = 0;
 
         // Get all the HTML elements
         const audio = new Audio();
@@ -143,6 +141,9 @@
         const currentTimeEl = document.getElementById('current-time');
         const totalTimeEl = document.getElementById('total-time');
         const audioFile = document.getElementById('audio-file');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const playlistEl = document.getElementById('playlist');
 
         let isPlaying = false;
 
@@ -205,24 +206,89 @@
             audio.volume = volumeSlider.value;
         });
 
-        // Event listener for the file input
-        audioFile.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                // Use the FileReader API to read the file
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    // Set the audio source to the data URL of the local file
-                    loadSong(e.target.result, file.name.split('.')[0]);
-                    isPlaying = false; // Reset play state
-                    playPauseBtn.click(); // Simulate a click to start playing
+        // Function to load and play a song from playlist
+        function loadSongFromPlaylist(index) {
+            const song = playlist[index];
+            if (!song) return;
+            audio.src = song.src;
+            songTitle.textContent = song.title;
+            songArtist.textContent = song.artist || "Unknown Artist";
+            albumArt.src = song.albumArt || "https://placehold.co/200x200/264653/ffffff?text=Music";
+            currentIndex = index;
+            isPlaying = false;
+            playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+        }
+
+        // Function to render playlist
+        function renderPlaylist() {
+            playlistEl.innerHTML = '';
+            playlist.forEach((song, idx) => {
+                const item = document.createElement('div');
+                item.className = `py-2 px-3 rounded cursor-pointer ${idx === currentIndex ? 'bg-emerald-700 text-white' : 'hover:bg-gray-700 text-gray-300'}`;
+                item.textContent = song.title;
+                item.onclick = () => {
+                    loadSongFromPlaylist(idx);
+                    playPauseBtn.click();
                 };
-                reader.readAsDataURL(file);
+                playlistEl.appendChild(item);
+            });
+        }
+
+        // Next/Prev controls
+        nextBtn.addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            let next = (currentIndex + 1) % playlist.length;
+            loadSongFromPlaylist(next);
+            playPauseBtn.click();
+            renderPlaylist();
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (playlist.length === 0) return;
+            let prev = (currentIndex - 1 + playlist.length) % playlist.length;
+            loadSongFromPlaylist(prev);
+            playPauseBtn.click();
+            renderPlaylist();
+        });
+
+        // Play next song automatically when current ends
+        audio.addEventListener('ended', () => {
+            if (playlist.length > 0) {
+                let next = (currentIndex + 1) % playlist.length;
+                loadSongFromPlaylist(next);
+                playPauseBtn.click();
+                renderPlaylist();
             }
         });
 
-        // Initial song load for demo purposes
-        loadSong(songs[0].audioSrc, songs[0].title, songs[0].artist, songs[0].albumArt);
+        // File input for multiple files
+        audioFile.addEventListener('change', (event) => {
+            const files = Array.from(event.target.files);
+            playlist = files.map(file => ({
+                title: file.name.split('.')[0],
+                artist: "Local File",
+                albumArt: "https://placehold.co/200x200/264653/ffffff?text=Music",
+                file: file,
+                src: URL.createObjectURL(file)
+            }));
+            loadSongFromPlaylist(0);
+            playPauseBtn.click();
+            renderPlaylist();
+        });
+
+        // Initial demo song (if no files loaded)
+        window.addEventListener('DOMContentLoaded', () => {
+            playlist = [
+                {
+                    title: "In the Sky",
+                    artist: "Imaginary Band",
+                    albumArt: "https://placehold.co/200x200/264653/ffffff?text=Music",
+                    src: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
+                }
+            ];
+            loadSongFromPlaylist(0);
+            renderPlaylist();
+        });
     </script>
 </body>
 </html>
