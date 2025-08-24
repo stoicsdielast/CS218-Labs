@@ -1,0 +1,315 @@
+<!-- This is a web application to convert an image file or a camera picture to a PDF. -->
+<!-- It demonstrates using the browser's camera API and a JavaScript library (jsPDF) for conversion. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera to PDF Converter</title>
+    <!-- Use Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 600px;
+        }
+        .message-box {
+            display: none; /* Hidden by default */
+        }
+        .loading-spinner {
+            display: none; /* Hidden by default */
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #3b82f6;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .capture-btn {
+            display: none; /* Hidden by default */
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%; /* 4:3 aspect ratio */
+            overflow: hidden;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background-color: #000;
+        }
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="container bg-white p-6 rounded-xl shadow-lg text-center">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Camera & File to PDF</h1>
+        <p class="text-gray-600 mb-4">Choose an option below to get started:</p>
+
+        <div class="flex space-x-2 mb-6">
+            <button id="fileModeBtn" class="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-600 transition duration-300">Select File</button>
+            <button id="cameraModeBtn" class="flex-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-lg font-semibold hover:bg-gray-400 transition duration-300">Use Camera</button>
+        </div>
+
+        <div id="fileMode" class="space-y-4">
+            <input type="file" id="imageInput" accept="image/*" class="w-full text-sm text-gray-500
+                file:mr-4 file:py-2 file:px-4
+                file:rounded-full file:border-0
+                file:text-sm file:font-semibold
+                file:bg-blue-50 file:text-blue-700
+                hover:file:bg-blue-100">
+
+            <button id="convertBtn" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold
+                hover:bg-blue-700 transition duration-300 ease-in-out cursor-pointer" disabled>
+                Convert to PDF
+            </button>
+        </div>
+
+        <div id="cameraMode" class="space-y-4 hidden">
+            <div id="videoContainer" class="video-container">
+                <video id="cameraFeed" autoplay class="w-full h-full rounded-lg"></video>
+            </div>
+            <button id="captureBtn" class="w-full capture-btn bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold
+                hover:bg-blue-700 transition duration-300 ease-in-out cursor-pointer">
+                Capture Photo
+            </button>
+            <canvas id="canvas" class="hidden"></canvas>
+        </div>
+
+        <div class="space-y-4 mt-6">
+            <div id="loading" class="loading-spinner mx-auto"></div>
+
+            <div id="messageBox" class="message-box bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                <span id="messageText" class="block sm:inline"></span>
+            </div>
+
+            <a id="downloadLink" href="#" class="hidden w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold
+                hover:bg-green-700 transition duration-300 ease-in-out">
+                Download PDF
+            </a>
+
+            <button id="emailBtn" class="hidden w-full bg-yellow-500 text-white py-3 px-6 rounded-lg font-semibold
+                hover:bg-yellow-600 transition duration-300 ease-in-out">
+                Open Email Program
+            </button>
+        </div>
+    </div>
+
+    <!-- jsPDF library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileModeBtn = document.getElementById('fileModeBtn');
+            const cameraModeBtn = document.getElementById('cameraModeBtn');
+            const fileMode = document.getElementById('fileMode');
+            const cameraMode = document.getElementById('cameraMode');
+            const imageInput = document.getElementById('imageInput');
+            const convertBtn = document.getElementById('convertBtn');
+            const cameraFeed = document.getElementById('cameraFeed');
+            const captureBtn = document.getElementById('captureBtn');
+            const canvas = document.getElementById('canvas');
+            const downloadLink = document.getElementById('downloadLink');
+            const emailBtn = document.getElementById('emailBtn');
+            const messageBox = document.getElementById('messageBox');
+            const messageText = document.getElementById('messageText');
+            const loadingSpinner = document.getElementById('loading');
+
+            let selectedFile = null;
+            let cameraStream = null;
+
+            // Helper function to switch between modes
+            function switchMode(mode) {
+                // Reset state
+                selectedFile = null;
+                imageInput.value = '';
+                convertBtn.disabled = true;
+                messageBox.style.display = 'none';
+                downloadLink.classList.add('hidden');
+                emailBtn.classList.add('hidden');
+                
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                    cameraStream = null;
+                }
+                
+                if (mode === 'file') {
+                    fileMode.classList.remove('hidden');
+                    cameraMode.classList.add('hidden');
+                    fileModeBtn.classList.replace('bg-gray-300', 'bg-blue-500');
+                    fileModeBtn.classList.replace('text-gray-800', 'text-white');
+                    cameraModeBtn.classList.replace('bg-blue-500', 'bg-gray-300');
+                    cameraModeBtn.classList.replace('text-white', 'text-gray-800');
+                } else if (mode === 'camera') {
+                    fileMode.classList.add('hidden');
+                    cameraMode.classList.remove('hidden');
+                    cameraModeBtn.classList.replace('bg-gray-300', 'bg-blue-500');
+                    cameraModeBtn.classList.replace('text-gray-800', 'text-white');
+                    fileModeBtn.classList.replace('bg-blue-500', 'bg-gray-300');
+                    fileModeBtn.classList.replace('text-white', 'text-gray-800');
+                    startCamera();
+                }
+            }
+
+            // Start the camera feed
+            async function startCamera() {
+                try {
+                    const constraints = { video: { facingMode: 'environment' } }; // Use the back camera on mobile
+                    cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    cameraFeed.srcObject = cameraStream;
+                    cameraFeed.onloadedmetadata = () => {
+                        cameraFeed.play();
+                        captureBtn.style.display = 'block';
+                    };
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    showMessage('Could not access camera. Please check permissions.', 'red');
+                    captureBtn.style.display = 'none';
+                }
+            }
+
+            // Enable convert button when a file is selected
+            imageInput.addEventListener('change', (event) => {
+                selectedFile = event.target.files[0];
+                if (selectedFile) {
+                    convertBtn.disabled = false;
+                    messageBox.style.display = 'none';
+                    downloadLink.classList.add('hidden');
+                    emailBtn.classList.add('hidden');
+                } else {
+                    convertBtn.disabled = true;
+                }
+            });
+
+            // Handle the capture button click
+            captureBtn.addEventListener('click', () => {
+                const context = canvas.getContext('2d');
+                canvas.width = cameraFeed.videoWidth;
+                canvas.height = cameraFeed.videoHeight;
+                context.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
+
+                // Stop the camera stream after capturing
+                if (cameraStream) {
+                    cameraStream.getTracks().forEach(track => track.stop());
+                }
+
+                // Get the image data from the canvas as a blob
+                canvas.toBlob((blob) => {
+                    selectedFile = blob;
+                    if (selectedFile) {
+                        convertAndDownload();
+                    } else {
+                        showMessage('Failed to capture image.', 'red');
+                    }
+                }, 'image/jpeg');
+            });
+            
+            // Handle the convert button click for file mode
+            convertBtn.addEventListener('click', () => {
+                if (!selectedFile) {
+                    showMessage('Please select an image file first.', 'red');
+                    return;
+                }
+                convertAndDownload();
+            });
+
+            // Main conversion and download logic
+            async function convertAndDownload() {
+                convertBtn.disabled = true;
+                loadingSpinner.style.display = 'block';
+                downloadLink.classList.add('hidden');
+                emailBtn.classList.add('hidden');
+                messageBox.style.display = 'none';
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+
+                    // Read the image file as a data URL
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        img.onload = function() {
+                            // Calculate dimensions to fit the page while maintaining aspect ratio
+                            const imgWidth = this.width;
+                            const imgHeight = this.height;
+                            const pageWidth = pdf.internal.pageSize.getWidth();
+                            const pageHeight = pdf.internal.pageSize.getHeight();
+                            const margin = 10;
+                            let ratio = Math.min((pageWidth - 2 * margin) / imgWidth, (pageHeight - 2 * margin) / imgHeight);
+                            
+                            const newWidth = imgWidth * ratio;
+                            const newHeight = imgHeight * ratio;
+
+                            pdf.addImage(this, 'JPEG', (pageWidth - newWidth) / 2, (pageHeight - newHeight) / 2, newWidth, newHeight);
+
+                            // Save the PDF and provide a download link
+                            const pdfOutput = pdf.output('blob');
+                            const url = URL.createObjectURL(pdfOutput);
+
+                            downloadLink.href = url;
+                            downloadLink.download = `document.pdf`;
+                            downloadLink.classList.remove('hidden');
+
+                            emailBtn.classList.remove('hidden');
+                            loadingSpinner.style.display = 'none';
+                            showMessage('File converted successfully!', 'green');
+
+                            // Cleanup the object URL
+                            downloadLink.addEventListener('click', () => {
+                                setTimeout(() => URL.revokeObjectURL(url), 100);
+                            });
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(selectedFile);
+                } catch (error) {
+                    console.error('Error during conversion:', error);
+                    loadingSpinner.style.display = 'none';
+                    showMessage('Conversion failed. Please try again.', 'red');
+                }
+            }
+
+            // Open the user's email client
+            emailBtn.addEventListener('click', () => {
+                window.location.href = 'mailto:?subject=Converted Document&body=Here is the document I converted to a PDF. You will need to attach it yourself.';
+            });
+
+            // Helper function to show messages
+            function showMessage(text, type) {
+                messageText.textContent = text;
+                messageBox.style.display = 'block';
+                messageBox.classList.remove('bg-green-100', 'bg-red-100');
+                messageBox.classList.remove('text-green-700', 'text-red-700');
+                messageBox.classList.remove('border-green-400', 'border-red-400');
+                if (type === 'green') {
+                    messageBox.classList.add('bg-green-100', 'text-green-700', 'border-green-400');
+                } else if (type === 'red') {
+                    messageBox.classList.add('bg-red-100', 'text-red-700', 'border-red-400');
+                }
+            }
+            
+            // Event listeners for mode buttons
+            fileModeBtn.addEventListener('click', () => switchMode('file'));
+            cameraModeBtn.addEventListener('click', () => switchMode('camera'));
+
+            // Initial mode
+            switchMode('file');
+        });
+    </script>
+</body>
+</html>

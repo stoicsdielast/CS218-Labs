@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Music Player</title>
+    <!-- Use Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Use Inter font for a clean look */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 10px;
+        }
+        /* Style for the volume slider */
+        #volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #f9fafb;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #f9fafb;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #volume-slider::-webkit-slider-runnable-track,
+        #volume-slider::-moz-range-track {
+            height: 4px;
+            cursor: pointer;
+            background: #4b5563;
+            border-radius: 2px;
+        }
+        /* Style for the progress bar */
+        #progress-bar {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #4b5563;
+            border-radius: 4px;
+        }
+        #progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #f9fafb;
+            border-radius: 50%;
+        }
+        #progress-bar::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #f9fafb;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="bg-gray-800 rounded-2xl shadow-xl p-8 max-w-sm w-full transition-all duration-300 hover:shadow-2xl">
+        
+        <!-- Album Art and Song Info -->
+        <div class="flex flex-col items-center mb-6">
+            <img id="album-art" src="https://placehold.co/200x200/264653/ffffff?text=Music" alt="Album Art" class="w-48 h-48 rounded-lg shadow-lg mb-4">
+            <h2 id="song-title" class="text-xl font-bold mb-1">Song Title</h2>
+            <p id="song-artist" class="text-sm text-gray-400">Artist Name</p>
+        </div>
+
+        <!-- Progress Bar and Time Display -->
+        <div class="mb-6">
+            <input type="range" id="progress-bar" value="0" max="100">
+            <div class="flex justify-between text-xs text-gray-400 mt-2">
+                <span id="current-time">0:00</span>
+                <span id="total-time">0:00</span>
+            </div>
+        </div>
+
+        <!-- Player Controls -->
+        <div class="flex items-center justify-center space-x-6 mb-6">
+            <button id="prev-btn" class="p-3 text-gray-400 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-back"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" x2="5" y1="19" y2="5"/></svg>
+            </button>
+            <button id="play-pause-btn" class="p-4 bg-emerald-500 rounded-full text-gray-900 shadow-lg hover:bg-emerald-400 transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <button id="next-btn" class="p-3 text-gray-400 hover:text-white transition-colors duration-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-forward"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" x2="19" y1="5" y2="19"/></svg>
+            </button>
+        </div>
+
+        <!-- Volume Control -->
+        <div class="flex items-center space-x-3 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-1"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" class="w-full">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume-2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        </div>
+
+        <!-- File Input for local files -->
+        <div class="mt-8 text-center">
+            <label for="audio-file" class="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-200">
+                Load Local Music
+            </label>
+            <input type="file" id="audio-file" accept="audio/*" class="hidden">
+        </div>
+    </div>
+    
+    <script>
+        // Data for the music player (now only for initial display, loaded from file input)
+        const songs = [
+            {
+                title: "In the Sky",
+                artist: "Imaginary Band",
+                albumArt: "https://placehold.co/200x200/264653/ffffff?text=Music",
+                audioSrc: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3"
+            }
+        ];
+
+        // Get all the HTML elements
+        const audio = new Audio();
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const volumeSlider = document.getElementById('volume-slider');
+        const songTitle = document.getElementById('song-title');
+        const songArtist = document.getElementById('song-artist');
+        const albumArt = document.getElementById('album-art');
+        const currentTimeEl = document.getElementById('current-time');
+        const totalTimeEl = document.getElementById('total-time');
+        const audioFile = document.getElementById('audio-file');
+
+        let isPlaying = false;
+
+        // Function to load and play a song
+        function loadSong(src, title = "Unknown Title", artist = "Unknown Artist", art = "https://placehold.co/200x200/264653/ffffff?text=Music") {
+            audio.src = src;
+            songTitle.textContent = title;
+            songArtist.textContent = artist;
+            albumArt.src = art;
+            
+            // Automatically play once a new song is loaded
+            if (isPlaying) {
+                audio.play();
+            }
+        }
+
+        // Function to format time in minutes:seconds
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainderSeconds = Math.floor(seconds % 60);
+            return `${minutes}:${remainderSeconds < 10 ? '0' : ''}${remainderSeconds}`;
+        }
+
+        // Event listener for the play/pause button
+        playPauseBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                audio.pause();
+                // Change icon to play button
+                playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+            } else {
+                audio.play();
+                // Change icon to pause button
+                playPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect width="6" height="16" x="4" y="4"/><rect width="6" height="16" x="14" y="4"/></svg>`;
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // Event listener for time updates
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = progress;
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+            }
+        });
+
+        // Event listener for when audio metadata is loaded
+        audio.addEventListener('loadedmetadata', () => {
+            totalTimeEl.textContent = formatTime(audio.duration);
+        });
+
+        // Event listener for the progress bar
+        progressBar.addEventListener('input', () => {
+            const newTime = (progressBar.value / 100) * audio.duration;
+            audio.currentTime = newTime;
+        });
+
+        // Event listener for the volume slider
+        volumeSlider.addEventListener('input', () => {
+            audio.volume = volumeSlider.value;
+        });
+
+        // Event listener for the file input
+        audioFile.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // Use the FileReader API to read the file
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Set the audio source to the data URL of the local file
+                    loadSong(e.target.result, file.name.split('.')[0]);
+                    isPlaying = false; // Reset play state
+                    playPauseBtn.click(); // Simulate a click to start playing
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initial song load for demo purposes
+        loadSong(songs[0].audioSrc, songs[0].title, songs[0].artist, songs[0].albumArt);
+    </script>
+</body>
+</html>
