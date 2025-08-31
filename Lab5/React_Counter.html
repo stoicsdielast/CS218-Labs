@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab 6: React Counter App</title>
+    <title>Lab 6: Personalized React Counter App</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React and Babel are used to build the dynamic application -->
@@ -17,7 +17,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center min-h-screen p-4">
 
     <!-- The root element where the React application will be rendered -->
     <div id="root" class="w-full"></div>
@@ -25,7 +25,7 @@
     <!-- The main script tag for our React application -->
     <script type="text/babel">
         // ---------------------------------------------------------------------
-        // Lab 6: React Counter App - Starting Code
+        // Lab 6: Personalized React Counter App - Option 1
         // ---------------------------------------------------------------------
 
         /**
@@ -55,29 +55,37 @@
 
             // This is the JSX (JavaScript XML) that defines the UI for the component.
             return (
-                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-lg mx-auto text-center space-y-6">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        React Counter App
+                <div className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 shadow-2xl rounded-3xl p-8 w-full max-w-lg mx-auto text-center space-y-6 border-4 border-white/20 backdrop-blur-sm">
+                    <h1 className="text-4xl font-bold text-white drop-shadow-lg">
+                        Welcome to my first Reach Count App - Parvish Mohan 
                     </h1>
 
-                    <p className="text-7xl font-extrabold text-blue-600 dark:text-blue-400">
-                        {count}
-                    </p>
+                    <div className="bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/30">
+                        <p className="text-8xl font-extrabold text-yellow-300 drop-shadow-2xl animate-pulse">
+                            {count}
+                        </p>
+                    </div>
 
                     <div className="flex justify-center space-x-4">
                         <button
                             onClick={handleIncrement}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                            className="bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl border-2 border-white/30"
                         >
-                            Increment
+                            ✨ Increment
                         </button>
 
                         <button
                             onClick={handleReset}
-                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                            className="bg-gradient-to-r from-rose-400 to-pink-400 hover:from-rose-500 hover:to-pink-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-110 hover:shadow-2xl border-2 border-white/30"
                         >
-                            Reset
+                            🔄 Reset
                         </button>
+                    </div>
+
+                    <div className="text-center">
+                        <p className="text-white/80 text-sm">
+                            Click the buttons to see the magic happen! ✨
+                        </p>
                     </div>
                 </div>
             );

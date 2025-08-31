@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flight Booking App</title>
+    <title>Flight Booking App - Customized</title>
     <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- React and Babel -->
@@ -19,7 +19,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gradient-to-br from-teal-50 via-cyan-50 to-blue-100 dark:bg-gradient-to-br dark:from-teal-900 dark:via-cyan-900 dark:to-blue-900 flex items-center justify-center min-h-screen p-4">
 
     <div id="root" class="w-full"></div>
 
@@ -94,75 +94,89 @@
             // Conditional rendering based on booking status
             if (bookingConfirmed) {
                 return (
-                    <div id="confirmation-details" className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-lg mx-auto text-center space-y-6">
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Booking Confirmed! ✅</h1>
-                        <p className="text-lg text-gray-700 dark:text-gray-300">Your flight to **{destination}** has been successfully booked.</p>
-                        <div className="text-left bg-gray-50 dark:bg-gray-700 rounded-lg p-4 space-y-2">
-                            <p className="text-md font-medium text-gray-900 dark:text-white">Flight Details:</p>
-                            <p>Destination: <span className="font-semibold">{destination}</span></p>
-                            <p>Seat Class: <span className="font-semibold">{seatClass}</span></p>
-                            <p>Total Cost: <span className="font-semibold">${totalPrice}</span></p>
+                    <div id="confirmation-details" className="bg-teal-100 dark:bg-teal-900 shadow-2xl rounded-3xl p-8 w-full max-w-lg mx-auto text-center space-y-6 border-2 border-teal-200 dark:border-teal-700">
+                        <h1 className="text-4xl font-bold text-teal-900 dark:text-teal-100">✈️ Booking Confirmed! ✅</h1>
+                        <p className="text-lg text-teal-700 dark:text-teal-300">Your flight to **{destination}** has been successfully booked.</p>
+                        <div className="text-left bg-teal-50 dark:bg-teal-800 rounded-lg p-4 space-y-2 border border-teal-200 dark:border-teal-600">
+                            <p className="text-md font-medium text-teal-900 dark:text-teal-100">🛫 Flight Details:</p>
+                            <p className="text-teal-800 dark:text-teal-200">📍 Destination: <span className="font-semibold">{destination}</span></p>
+                            <p className="text-teal-800 dark:text-teal-200">💺 Seat Class: <span className="font-semibold">{seatClass}</span></p>
+                            <p className="text-teal-800 dark:text-teal-200">💰 Total Cost: <span className="font-semibold">${totalPrice}</span></p>
                         </div>
                         <button
                             onClick={generatePDF}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl border-2 border-white/20"
                         >
-                            Download PDF Confirmation
+                            📄 Download PDF Confirmation
                         </button>
                     </div>
                 );
             }
 
             return (
-                <div className="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-lg mx-auto text-center space-y-6">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Book Your Flight</h1>
+                <div className="bg-teal-100 dark:bg-teal-900 shadow-2xl rounded-3xl p-8 w-full max-w-lg mx-auto text-center space-y-6 border-2 border-teal-200 dark:border-teal-700">
+                    <h1 className="text-4xl font-bold text-teal-900 dark:text-teal-100">
+                        ✈️ Book Your Flight 🌍
+                    </h1>
                     <form onSubmit={handleBooking} className="space-y-4 text-left">
                         {/* Destination Selection */}
                         <div>
-                            <label htmlFor="destination" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Destination</label>
+                            <label htmlFor="destination" className="block text-sm font-medium text-teal-700 dark:text-teal-300 mb-2">
+                                📍 Choose Your Destination
+                            </label>
                             <select
                                 id="destination"
                                 value={destination}
                                 onChange={e => setDestination(e.target.value)}
-                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                                className="mt-1 block w-full pl-3 pr-10 py-3 text-base border-2 border-teal-300 dark:border-teal-600 bg-white dark:bg-teal-800 text-teal-900 dark:text-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 rounded-xl shadow-sm transition-all duration-200"
                             >
                                 {Object.keys(flightPrices).map(dest => (
-                                    <option key={dest} value={dest}>{dest} (${flightPrices[dest]})</option>
+                                    <option key={dest} value={dest} className="bg-white dark:bg-teal-800">
+                                        {dest} (${flightPrices[dest]})
+                                    </option>
                                 ))}
                             </select>
                         </div>
 
                         {/* Seat Class Selection */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Seat Class</label>
-                            <div className="mt-1 space-y-2">
+                            <label className="block text-sm font-medium text-teal-700 dark:text-teal-300 mb-2">
+                                💺 Select Seat Class
+                            </label>
+                            <div className="mt-1 space-y-3">
                                 {Object.keys(seatCosts).map(seat => (
-                                    <label key={seat} className="inline-flex items-center">
+                                    <label key={seat} className="flex items-center p-3 bg-teal-50 dark:bg-teal-800 rounded-lg border border-teal-200 dark:border-teal-600 hover:bg-teal-100 dark:hover:bg-teal-700 transition-all duration-200 cursor-pointer">
                                         <input
                                             type="radio"
                                             name="seat-class"
                                             value={seat}
                                             checked={seatClass === seat}
                                             onChange={e => setSeatClass(e.target.value)}
-                                            className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300"
+                                            className="focus:ring-teal-500 h-4 w-4 text-teal-600 border-teal-300"
                                         />
-                                        <span className="ml-2 text-gray-700 dark:text-gray-300">{seat} (${seatCosts[seat]} extra)</span>
+                                        <span className="ml-3 text-teal-700 dark:text-teal-300 font-medium">
+                                            {seat === 'Standard' ? '🪑' : '✨'} {seat} 
+                                            <span className="text-teal-600 dark:text-teal-400">
+                                                ({seatCosts[seat] === 0 ? 'Included' : `+$${seatCosts[seat]}`})
+                                            </span>
+                                        </span>
                                     </label>
                                 ))}
                             </div>
                         </div>
 
                         {/* Total Price Display */}
-                        <div className="text-center bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 font-bold py-3 rounded-lg">
-                            Total: ${totalPrice}
+                        <div className="text-center bg-gradient-to-r from-cyan-100 to-teal-100 dark:from-cyan-900 dark:to-teal-900 text-teal-800 dark:text-teal-200 font-bold py-4 rounded-xl border-2 border-teal-300 dark:border-teal-600 shadow-inner">
+                            <p className="text-lg">💰 Total Price</p>
+                            <p className="text-3xl font-extrabold text-teal-900 dark:text-teal-100">${totalPrice}</p>
                         </div>
 
-                        {/* Fake Payment Button */}
+                        {/* Enhanced Confirm Booking Button */}
                         <button
                             type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+                            className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl border-2 border-white/20 active:scale-95"
                         >
-                            Confirm Booking
+                            ✈️ Confirm Booking 🎫
                         </button>
                     </form>
                 </div>
