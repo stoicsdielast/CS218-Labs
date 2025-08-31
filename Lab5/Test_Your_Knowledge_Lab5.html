@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Computing Quiz</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-option {
+            transition: all 0.2s;
+        }
+        .correct-answer {
+            background-color: #10B981; /* Green-500 */
+        }
+        .wrong-answer {
+            background-color: #EF4444; /* Red-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main quiz container -->
+    <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8 w-full max-w-lg space-y-6 text-center transition-all duration-300">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Mobile Computing Quiz</h1>
+
+        <!-- Quiz Start Section -->
+        <div id="start-section" class="space-y-4">
+            <p class="text-gray-600 dark:text-gray-400">
+                Test your knowledge on topics from Labs 1 to Labs 4.
+            </p>
+            <button id="start-quiz-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105">
+                Start Quiz
+            </button>
+        </div>
+
+        <!-- Quiz Questions Section -->
+        <div id="quiz-section" class="hidden space-y-4">
+            <p id="question-number" class="text-sm font-medium text-blue-600 dark:text-blue-400">Question 1 of 20</p>
+            <p id="question-text" class="text-lg font-semibold text-gray-900 dark:text-white">
+                <!-- Question text will be inserted here -->
+            </p>
+            <div id="options-container" class="flex flex-col space-y-3">
+                <!-- Options buttons will be inserted here -->
+            </div>
+            <p id="feedback-text" class="text-sm font-medium h-4"></p>
+        </div>
+
+        <!-- Quiz Results Section -->
+        <div id="results-section" class="hidden space-y-4">
+            <svg class="mx-auto h-16 w-16 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">Quiz Complete!</p>
+            <p class="text-lg text-gray-700 dark:text-gray-300">Your Score:</p>
+            <p id="final-score" class="text-4xl font-extrabold text-blue-600 dark:text-blue-400">0 / 20</p>
+            <p id="score-message" class="text-sm text-gray-500 dark:text-gray-400">
+                <!-- Message based on score will be inserted here -->
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Array of quiz questions, with question text, options, and the correct answer.
+        const quizQuestions = [
+            // Lab 1 Questions (Java/Kotlin Basics)
+            {
+                question: "In Kotlin, which keyword is used to declare a variable that cannot be changed after its initial assignment?",
+                options: ["var", "val", "let", "const"],
+                correctAnswer: "val"
+            },
+            {
+                question: "Which Java variable type is used to store text values, and requires double quotes?",
+                options: ["int", "char", "String", "boolean"],
+                correctAnswer: "String"
+            },
+            {
+                question: "What is the correct way to add a single-line comment in Java?",
+                options: ["/* This is a comment */", "// This is a comment", "# This is a comment", "<!-- This is a comment -->"],
+                correctAnswer: "// This is a comment"
+            },
+            {
+                question: "In Kotlin, what is a 'string template' and what symbol is used to create one?",
+                options: ["A function that formats strings; `format()`", "A way to combine text and variables; `$`", "A way to define a string constant; `$`", "A text-only variable; `var`"],
+                correctAnswer: "A way to combine text and variables; `$`"
+            },
+            // Lab 2 Questions (Java Payroll)
+            {
+                question: "In the provided Payroll Calculator, which Java class is used to get user input from the console?",
+                options: ["System.out", "DecimalFormat", "Scanner", "InputReader"],
+                correctAnswer: "Scanner"
+            },
+            {
+                question: "What is the purpose of the `final` keyword in the Payroll Calculator program?",
+                options: ["To format decimal numbers", "To indicate the end of the program", "To declare a constant value that cannot be changed", "To declare a variable for user input"],
+                correctAnswer: "To declare a constant value that cannot be changed"
+            },
+            {
+                question: "If an employee works 45 hours, how are the hours beyond the OVERTIME_THRESHOLD calculated for the time-and-a-half overtime pay?",
+                options: ["(45 - 40) * 1.5", "45 * 1.5", "40 * 1.5", "45 - 40"],
+                correctAnswer: "(45 - 40) * 1.5"
+            },
+            {
+                question: "What does the `DecimalFormat` object do in the Payroll Calculator program?",
+                options: ["Calculates decimals", "Formats output to a specific number of decimal places", "Converts numbers to strings", "Rounds numbers to the nearest integer"],
+                correctAnswer: "Formats output to a specific number of decimal places"
+            },
+            // Lab 3 Questions (Java Game & Networking)
+            {
+                question: "In the Java Guessing Game, what is the primary purpose of the `try...catch` block?",
+                options: ["To create a loop", "To generate a random number", "To handle potential errors from user input", "To print a message to the console"],
+                correctAnswer: "To handle potential errors from user input"
+            },
+            {
+                question: "What is the purpose of the `while (!hasGuessedCorrectly)` loop in the Guessing Game?",
+                options: ["To run the game only once", "To generate a new random number", "To continue looping until the user guesses correctly", "To check if the user input is a number"],
+                correctAnswer: "To continue looping until the user guesses correctly"
+            },
+            {
+                question: "According to the Cisco Packet Tracer Lab, what IP address and subnet mask should be configured on the router?",
+                options: ["192.168.0.10/24", "10.0.0.1/16", "50.0.0.1/8", "172.16.0.1/24"],
+                correctAnswer: "50.0.0.1/8"
+            },
+            {
+                question: "What is the purpose of the DHCP service configured on the router in the Packet Tracer Lab?",
+                options: ["To manually assign IP addresses to devices", "To provide wireless connectivity", "To automatically assign IP addresses to devices", "To block unauthorized access"],
+                correctAnswer: "To automatically assign IP addresses to devices"
+            },
+            // Lab 4 Questions (Java Mobility & No-Code)
+            {
+                question: "In the MobileAgent.java file, what is the purpose of the `currentAddress` attribute?",
+                options: ["To store the agent's home address", "To track the agent's current location", "To assign a new IP address to the agent", "To manage network traffic"],
+                correctAnswer: "To track the agent's current location"
+            },
+            {
+                question: "What is a key benefit of using a no-code platform like GoodBarber, as mentioned in the lab?",
+                options: ["Complete control over every line of code", "The ability to build apps without writing code", "More expensive development costs", "Faster performance than a native app"],
+                correctAnswer: "The ability to build apps without writing code"
+            },
+            {
+                question: "According to the lab, what data structure does the HomeAgent use to keep track of a mobile agent's location?",
+                options: ["A queue", "A stack", "A hash map or similar structure (Binding Cache)", "An array"],
+                correctAnswer: "A hash map or similar structure (Binding Cache)"
+            },
+            {
+                question: "What is the primary function of the `forwardPacket()` method in the `HomeAgent` class?",
+                options: ["To delete packets", "To forward packets to the MobileAgent", "To create new packets", "To send packets to the ForeignAgent"],
+                correctAnswer: "To forward packets to the MobileAgent"
+            },
+            // Week 5 Lecture Questions (Location Management)
+            {
+                question: "Which of the following is a primary problem with the original Mobile IP protocol?",
+                options: ["Its reliance on GPS", "Its use of 'triangle routing'", "Its high security features", "Its use of cellular networks"],
+                correctAnswer: "Its use of 'triangle routing'"
+            },
+            {
+                question: "In 4G cellular networks, which core network entity handles location updates and seamless handoffs?",
+                options: ["Home Agent (HA)", "Foreign Agent (FA)", "Mobility Management Entity (MME)", "Access Point (AP)"],
+                correctAnswer: "Mobility Management Entity (MME)"
+            },
+            {
+                question: "What is the main benefit of modern cellular networks' built-in mobility management over Mobile IP?",
+                options: ["It is a separate protocol", "It requires more hardware", "It eliminates triangle routing and is more efficient", "It only works indoors"],
+                correctAnswer: "It eliminates triangle routing and is more efficient"
+            },
+            {
+                question: "From a user's perspective, what is a key advantage of eSIMs over traditional physical SIM cards?",
+                options: ["They are more durable", "They can only be used with a single carrier", "They streamline the process of switching carriers and simplify dual-SIM support", "They provide better network signal strength"],
+                correctAnswer: "They streamline the process of switching carriers and simplify dual-SIM support"
+            }
+        ];
+
+        // Global state variables
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // Get DOM elements
+        const startSection = document.getElementById('start-section');
+        const startQuizBtn = document.getElementById('start-quiz-btn');
+        const quizSection = document.getElementById('quiz-section');
+        const questionNumber = document.getElementById('question-number');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackText = document.getElementById('feedback-text');
+        const resultsSection = document.getElementById('results-section');
+        const finalScore = document.getElementById('final-score');
+        const scoreMessage = document.getElementById('score-message');
+
+        /**
+         * Shuffles the questions array randomly.
+         * @param {Array} array The array to shuffle.
+         */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        /**
+         * Loads and displays the current question.
+         */
+        function loadQuestion() {
+            if (currentQuestionIndex < quizQuestions.length) {
+                const question = quizQuestions[currentQuestionIndex];
+                questionNumber.textContent = `Question ${currentQuestionIndex + 1} of ${quizQuestions.length}`;
+                questionText.textContent = question.question;
+                optionsContainer.innerHTML = '';
+                feedbackText.textContent = '';
+                
+                // Shuffle the options to prevent memorization
+                const shuffledOptions = [...question.options];
+                shuffleArray(shuffledOptions);
+
+                // Create and append option buttons
+                shuffledOptions.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.className = "btn-option w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-xl shadow-md transition-all duration-300";
+                    button.addEventListener('click', () => selectAnswer(button, option));
+                    optionsContainer.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        /**
+         * Handles the user's answer selection.
+         * @param {HTMLButtonElement} selectedButton The button element that was clicked.
+         * @param {string} selectedAnswer The text of the selected option.
+         */
+        function selectAnswer(selectedButton, selectedAnswer) {
+            const correctAnswer = quizQuestions[currentQuestionIndex].correctAnswer;
+            const optionButtons = optionsContainer.querySelectorAll('.btn-option');
+
+            // Disable all buttons to prevent multiple clicks
+            optionButtons.forEach(button => {
+                button.disabled = true;
+            });
+
+            if (selectedAnswer === correctAnswer) {
+                score++;
+                selectedButton.classList.add('correct-answer');
+                feedbackText.textContent = "Correct!";
+                feedbackText.classList.remove('text-red-600');
+                feedbackText.classList.add('text-green-600');
+            } else {
+                selectedButton.classList.add('wrong-answer');
+                feedbackText.textContent = "Incorrect.";
+                feedbackText.classList.remove('text-green-600');
+                feedbackText.classList.add('text-red-600');
+                // Highlight the correct answer
+                optionButtons.forEach(button => {
+                    if (button.textContent === correctAnswer) {
+                        button.classList.add('correct-answer');
+                    }
+                });
+            }
+
+            // Move to the next question after a short delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 1000);
+        }
+
+        /**
+         * Displays the final results of the quiz.
+         */
+        function showResults() {
+            quizSection.classList.add('hidden');
+            resultsSection.classList.remove('hidden');
+            finalScore.textContent = `${score} / ${quizQuestions.length}`;
+
+            // Provide a message based on the score
+            const percentage = (score / quizQuestions.length) * 100;
+            if (percentage >= 80) {
+                scoreMessage.textContent = "Excellent work! You have a great understanding of the material.";
+            } else if (percentage >= 50) {
+                scoreMessage.textContent = "Good effort! You've got a solid foundation, but there's room for improvement.";
+            } else {
+                scoreMessage.textContent = "Keep going! Review the lecture notes and labs to strengthen your knowledge.";
+            }
+        }
+
+        // Start the quiz when the button is clicked
+        startQuizBtn.addEventListener('click', () => {
+            startSection.classList.add('hidden');
+            quizSection.classList.remove('hidden');
+            shuffleArray(quizQuestions); // Randomize question order at the start
+            loadQuestion();
+        });
+
+    </script>
+</body>
+</html>
